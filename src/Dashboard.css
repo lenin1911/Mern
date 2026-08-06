@@ -1,0 +1,507 @@
+/* ─── Taskly Dashboard Layout & Styling ───────────────────────────── */
+.db-root {
+  min-height: 100vh;
+  background-color: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  color: #172b4d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Noto Sans, Ubuntu, sans-serif;
+}
+
+/* ─── Navbar ────────────────────────────────────────────────────────── */
+.db-navbar {
+  height: 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe1e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.db-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.db-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.db-logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0052cc;
+  letter-spacing: -0.5px;
+}
+
+.db-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-nav-btn {
+  background: transparent;
+  border: none;
+  color: #172b4d;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-nav-btn:hover {
+  background: #091e420f;
+}
+
+.db-chevron {
+  font-size: 10px;
+  color: #5e6c84;
+}
+
+.db-nav-create {
+  background: #0052cc;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.db-nav-create:hover {
+  background: #0065ff;
+}
+
+.db-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.db-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.db-search-icon {
+  position: absolute;
+  left: 8px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.db-search-input {
+  background: #fafbfc;
+  border: 1px solid #dfe1e6;
+  border-radius: 3px;
+  padding: 6px 10px 6px 28px;
+  font-size: 13px;
+  width: 200px;
+  outline: none;
+  transition: width 0.2s, border-color 0.2s;
+}
+
+.db-search-input:focus {
+  width: 260px;
+  border-color: #4c9aff;
+  background: #ffffff;
+}
+
+.db-icon-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.db-icon-btn:hover {
+  background: #091e420f;
+}
+
+.db-avatar-menu {
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.db-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0052cc;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Body & Sidebar ────────────────────────────────────────────────── */
+.db-body {
+  display: flex;
+  flex: 1;
+}
+
+.db-sidebar {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #dfe1e6;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.db-workspace-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.db-workspace-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0052cc, #00875a);
+  color: #ffffff;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db-workspace-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #172b4d;
+}
+
+.db-workspace-plan {
+  font-size: 12px;
+  color: #5e6c84;
+}
+
+.db-sidebar-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #5e6c84;
+  font-size: 16px;
+}
+
+.db-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.db-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #172b4d;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.db-sidebar-item:hover {
+  background: #091e420f;
+}
+
+.db-sidebar-item.active {
+  background: #e6fcff;
+  color: #0052cc;
+  font-weight: 600;
+}
+
+.db-sidebar-icon {
+  font-size: 14px;
+  color: #42526e;
+}
+
+.db-sidebar-divider {
+  height: 1px;
+  background: #dfe1e6;
+  margin: 12px 0;
+}
+
+.db-sidebar-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+}
+
+.db-sidebar-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b778c;
+  padding: 6px 8px 2px;
+}
+
+.db-sidebar-board-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #172b4d;
+  cursor: pointer;
+}
+
+.db-sidebar-board-item:hover {
+  background: #091e420f;
+}
+
+/* ─── Main Content Area ─────────────────────────────────────────────── */
+.db-main {
+  flex: 1;
+  padding: 32px 40px;
+}
+
+.db-section-heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: #172b4d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.db-section-icon {
+  color: #42526e;
+  font-size: 22px;
+}
+
+.db-boards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.db-board-card {
+  height: 100px;
+  border-radius: 4px;
+  padding: 12px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.db-board-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.db-board-card-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.db-board-star {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.db-board-star:hover {
+  color: #ffffff;
+}
+
+.db-board-add {
+  background: #091e420f !important;
+  color: #172b4d;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  border: 2px dashed #c1c7d0;
+}
+
+.db-board-add:hover {
+  background: #091e4214 !important;
+  border-color: #0052cc;
+  color: #0052cc;
+}
+
+/* ─── Profile Dropdown ────────────────────────────────────────────────── */
+.db-avatar-menu-wrapper {
+  position: relative;
+}
+
+.db-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.db-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+  padding: 16px;
+  z-index: 201;
+  animation: dropdownIn 0.15s ease both;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.db-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.db-dropdown-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #5e6c84;
+  letter-spacing: 0.5px;
+}
+
+.db-dropdown-close {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #5e6c84;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+}
+
+.db-dropdown-close:hover {
+  background: #091e420f;
+  color: #172b4d;
+}
+
+.db-dropdown-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 8px;
+}
+
+.db-avatar-large {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.db-user-details {
+  overflow: hidden;
+}
+
+.db-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #172b4d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-user-email {
+  font-size: 12px;
+  color: #5e6c84;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-dropdown-divider {
+  height: 1px;
+  background: #091e4224;
+  margin: 10px -16px;
+}
+
+.db-dropdown-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-dropdown-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 14px;
+  color: #172b4d;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.db-dropdown-item:hover {
+  background: #091e420f;
+}
+
+.db-dropdown-logout {
+  color: #de350b;
+  font-weight: 500;
+}
+
+.db-dropdown-logout:hover {
+  background: #ffebe6;
+  color: #de350b;
+}
+
