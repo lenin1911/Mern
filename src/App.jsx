@@ -2,26 +2,23 @@ import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import Login from "./Login";
-import Signup from "./Signup";
 import Dashboard from "./Dashboard";
 import "./App.css";
 
 function App() {
   const [user, setUser] = useState(undefined); // undefined = still loading
-  const [view, setView] = useState("login");
 
-  // Firebase keeps session alive automatically — just listen for changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser); // null if logged out, user object if logged in
+      setUser(firebaseUser);
     });
-    return unsubscribe; // cleanup listener on unmount
+    return unsubscribe;
   }, []);
 
-  // Show nothing while Firebase checks existing session
+  // Loading state while Firebase checks session
   if (user === undefined) {
     return (
-      <div className="page">
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8f9fa" }}>
         <div className="loading-spinner" />
       </div>
     );
@@ -32,18 +29,8 @@ function App() {
     return <Dashboard user={user} />;
   }
 
-  // Not logged in → Login or Signup
-  return (
-    <div className="page">
-      <div className="bg-grid" />
-      <div className="bg-glow" />
-      {view === "login" ? (
-        <Login onSwitch={() => setView("signup")} />
-      ) : (
-        <Signup onSwitch={() => setView("login")} />
-      )}
-    </div>
-  );
+  // Not logged in → Marketing landing page (Login contains both login + signup modals)
+  return <Login />;
 }
 
 export default App;
