@@ -1,667 +1,391 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import "./Dashboard.css";
 
-/* ─── Helpers ─────────────────────────────────────────────────────────── */
-let _id = 100;
-const uid = () => `id-${++_id}`;
+/* ─── Icons ───────────────────────────────────────────────────────────── */
+const IconReports = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </svg>
+);
+const IconLibrary = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+  </svg>
+);
+const IconPeople = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
+  </svg>
+);
+const IconActivities = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+const IconGetStarted = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+const IconSettings = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+  </svg>
+);
+const IconChevron = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+const IconArrowUp = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15" />
+  </svg>
+);
+const IconLogout = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
 
-const LABEL_COLORS = [
-  { id: "l1", color: "#61bd4f", name: "Green" },
-  { id: "l2", color: "#f2d600", name: "Yellow" },
-  { id: "l3", color: "#ff9f1a", name: "Orange" },
-  { id: "l4", color: "#eb5a46", name: "Red" },
-  { id: "l5", color: "#c377e0", name: "Purple" },
-  { id: "l6", color: "#0079bf", name: "Blue" },
-];
-
-/* ─── Initial Data ────────────────────────────────────────────────────── */
-const INITIAL_COLUMNS = [
-  {
-    id: "col-1",
-    title: "To Do",
-    cards: [
-      {
-        id: "card-1",
-        text: "Design new onboarding flow",
-        labels: ["l1", "l6"],
-        members: ["AL", "BK"],
-        due: "Aug 12",
-        dueOverdue: false,
-      },
-      {
-        id: "card-2",
-        text: "Write API documentation",
-        labels: ["l6"],
-        members: ["CJ"],
-        due: null,
-        dueOverdue: false,
-      },
-      {
-        id: "card-3",
-        text: "Set up CI/CD pipeline",
-        labels: ["l3"],
-        members: [],
-        due: "Aug 8",
-        dueOverdue: true,
-      },
-    ],
-  },
-  {
-    id: "col-2",
-    title: "In Progress",
-    cards: [
-      {
-        id: "card-4",
-        text: "Implement authentication module",
-        labels: ["l4"],
-        members: ["AL"],
-        due: "Aug 10",
-        dueOverdue: false,
-      },
-      {
-        id: "card-5",
-        text: "Refactor database schema",
-        labels: ["l2", "l3"],
-        members: ["BK", "CJ"],
-        due: null,
-        dueOverdue: false,
-      },
-    ],
-  },
-  {
-    id: "col-3",
-    title: "In Review",
-    cards: [
-      {
-        id: "card-6",
-        text: "Homepage redesign",
-        labels: ["l5"],
-        members: ["AL", "BK"],
-        due: "Aug 9",
-        dueOverdue: true,
-      },
-    ],
-  },
-  {
-    id: "col-4",
-    title: "Done",
-    cards: [
-      {
-        id: "card-7",
-        text: "Project kickoff meeting",
-        labels: ["l1"],
-        members: ["CJ"],
-        due: "Jul 30",
-        dueOverdue: false,
-      },
-      {
-        id: "card-8",
-        text: "Stakeholder alignment doc",
-        labels: [],
-        members: ["AL", "BK", "CJ"],
-        due: null,
-        dueOverdue: false,
-      },
-      {
-        id: "card-9",
-        text: "Initial wireframes approved",
-        labels: ["l6", "l1"],
-        members: ["BK"],
-        due: "Jul 25",
-        dueOverdue: false,
-      },
-    ],
-  },
-];
-
-/* ─── Member Avatar ───────────────────────────────────────────────────── */
-const MEMBER_COLORS = {
-  AL: "#0052cc",
-  BK: "#00875a",
-  CJ: "#bf2600",
-};
-
-function Avatar({ initials, size = 24 }) {
+/* ─── Sparkline SVG ───────────────────────────────────────────────────── */
+function Sparkline({ points, color = "#4f8ef7", height = 36 }) {
+  const w = 110;
+  const h = height;
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = max - min || 1;
+  const xs = points.map((_, i) => (i / (points.length - 1)) * w);
+  const ys = points.map((v) => h - ((v - min) / range) * (h - 6) - 3);
+  const d = xs.map((x, i) => `${i === 0 ? "M" : "L"}${x},${ys[i]}`).join(" ");
+  const fill = `${d} L${w},${h} L0,${h} Z`;
   return (
-    <span
-      className="trello-avatar"
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.4,
-        background: MEMBER_COLORS[initials] || "#5e6c84",
-      }}
-      title={initials}
-    >
-      {initials}
-    </span>
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`sg-${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={fill} fill={`url(#sg-${color.replace("#","")})`} />
+      <path d={d} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
-/* ─── Navbar ──────────────────────────────────────────────────────────── */
-function Navbar({ user, onLogout }) {
-  const name = user?.displayName || user?.email?.split("@")[0] || "User";
-  const initials = name.slice(0, 2).toUpperCase();
-  const [searchVal, setSearchVal] = useState("");
-
+/* ─── Activity Bar Chart ──────────────────────────────────────────────── */
+function ActivityChart() {
+  const months = ["JAN", "FEB", "MAR", "APR"];
+  const values = [180, 290, 220, 380];
+  const max = Math.max(...values);
   return (
-    <header className="trello-navbar">
-      {/* Left */}
-      <div className="trello-navbar-left">
-        <button className="trello-nav-icon-btn" title="Toggle sidebar" aria-label="Toggle sidebar">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <rect y="2" width="16" height="2" rx="1" />
-            <rect y="7" width="16" height="2" rx="1" />
-            <rect y="12" width="16" height="2" rx="1" />
-          </svg>
-        </button>
-
-        <div className="trello-logo">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect width="20" height="20" rx="3" fill="white" fillOpacity="0.3" />
-            <rect x="3" y="3" width="6" height="12" rx="1.5" fill="white" />
-            <rect x="11" y="3" width="6" height="8" rx="1.5" fill="white" />
-          </svg>
-          <span className="trello-logo-text">Taskly</span>
-        </div>
-
-        <div className="trello-nav-links">
-          <button className="trello-nav-link">
-            Workspaces <span className="trello-nav-caret">▾</span>
-          </button>
-          <button className="trello-nav-link">
-            Recent <span className="trello-nav-caret">▾</span>
-          </button>
-          <button className="trello-nav-link">
-            Starred <span className="trello-nav-caret">▾</span>
-          </button>
-          <button className="trello-nav-link trello-nav-link--hidden-md">
-            Templates <span className="trello-nav-caret">▾</span>
-          </button>
-          <button className="trello-create-btn">
-            <span>+</span> Create
-          </button>
-        </div>
-      </div>
-
-      {/* Center – search */}
-      <div className="trello-navbar-center">
-        <div className="trello-search-wrap">
-          <svg className="trello-search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-            <line x1="9.5" y1="9.5" x2="13" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <input
-            className="trello-search-input"
-            type="text"
-            placeholder="Search"
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Right */}
-      <div className="trello-navbar-right">
-        <button className="trello-nav-icon-btn" title="Notifications" aria-label="Notifications">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 16a2 2 0 002-2H6a2 2 0 002 2zm6-5c-.8-.9-2-2.3-2-6a4 4 0 00-8 0c0 3.7-1.2 5.1-2 6v1h12v-1z" />
-          </svg>
-        </button>
-        <button className="trello-nav-icon-btn" title="Help" aria-label="Help">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12a1 1 0 110-2 1 1 0 010 2zm1-4.5h-2V8a2 2 0 114 0c0 1.1-.7 1.7-1.3 2.2-.4.3-.7.6-.7.8z" />
-          </svg>
-        </button>
-        <button
-          className="trello-user-avatar-btn"
-          title={name}
-          onClick={onLogout}
-          aria-label={`Logged in as ${name}, click to log out`}
-        >
-          {initials}
-        </button>
-      </div>
-    </header>
-  );
-}
-
-/* ─── Board Header Bar ────────────────────────────────────────────────── */
-function BoardHeaderBar({ boardTitle, editingTitle, draft, onChange, onBlur, onKeyDown, onClick, titleRef }) {
-  return (
-    <div className="trello-board-header-bar">
-      {/* Left group */}
-      <div className="trello-board-header-left">
-        {editingTitle ? (
-          <input
-            ref={titleRef}
-            className="trello-board-title-input"
-            value={draft}
-            onChange={onChange}
-            onBlur={onBlur}
-            onKeyDown={onKeyDown}
-          />
-        ) : (
-          <h1 className="trello-board-title" onClick={onClick} title="Click to edit">
-            {boardTitle}
-          </h1>
-        )}
-
-        <button className="trello-hdr-icon-btn" title="Star board" aria-label="Star this board">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M7 1l1.545 3.13L12 4.635l-2.5 2.435.59 3.44L7 8.87l-3.09 1.64L4.5 7.07 2 4.635l3.455-.505L7 1z"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <div className="trello-hdr-sep" />
-
-        <button className="trello-hdr-text-btn" title="Change visibility" aria-label="Board visibility">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" style={{ marginRight: 4 }}>
-            <path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 7.5c-1.875 0-3.53-.96-4.5-2.4.022-1.49 3-2.31 4.5-2.31s4.478.82 4.5 2.31c-.97 1.44-2.625 2.4-4.5 2.4z" />
-          </svg>
-          Workspace
-        </button>
-
-        <div className="trello-hdr-sep" />
-
-        {/* Member avatars */}
-        <div className="trello-hdr-members">
-          {["AL", "BK", "CJ"].map((m) => (
-            <Avatar key={m} initials={m} size={28} />
-          ))}
-          <button className="trello-hdr-share-members" title="Invite to board">
-            Share
-          </button>
-        </div>
-      </div>
-
-      {/* Right group */}
-      <div className="trello-board-header-right">
-        <button className="trello-hdr-text-btn" aria-label="Filter cards">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" style={{ marginRight: 4 }}>
-            <path d="M1 2h11l-4 5v4l-3-1.5V7L1 2z" />
-          </svg>
-          Filters
-        </button>
-        <div className="trello-hdr-sep" />
-        <button className="trello-hdr-text-btn" aria-label="Power-Ups">
-          ⚡ Power-Ups
-        </button>
-        <button className="trello-hdr-text-btn" aria-label="Automation">
-          🤖 Automation
-        </button>
-        <div className="trello-hdr-sep" />
-        <button className="trello-hdr-text-btn trello-hdr-menu-btn" aria-label="Show board menu">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" style={{ marginRight: 4 }}>
-            <rect x="1" y="2" width="11" height="1.5" rx=".75" />
-            <rect x="1" y="5.75" width="11" height="1.5" rx=".75" />
-            <rect x="1" y="9.5" width="11" height="1.5" rx=".75" />
-          </svg>
-          Show menu
-        </button>
+    <div className="db-activity-chart">
+      <div className="db-bar-group">
+        {values.map((v, i) => (
+          <div key={i} className="db-bar-col">
+            <div className="db-bar-wrap">
+              <div className="db-bar" style={{ height: `${(v / max) * 100}%` }} />
+            </div>
+            <span className="db-bar-label">{months[i]}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-/* ─── Card Label ──────────────────────────────────────────────────────── */
-function CardLabel({ labelId }) {
-  const label = LABEL_COLORS.find((l) => l.id === labelId);
-  if (!label) return null;
+/* ─── Stat Card ───────────────────────────────────────────────────────── */
+function StatCard({ label, value, sub, sparkPoints, sparkColor, wide }) {
   return (
-    <span
-      className="trello-card-label"
-      style={{ background: label.color }}
-      title={label.name}
-    />
+    <div className={`db-stat-card${wide ? " db-stat-card--wide" : ""}`}>
+      <span className="db-stat-label">{label}</span>
+      <div className="db-stat-body">
+        <span className="db-stat-value">{value}</span>
+        {sub && <span className="db-stat-sub">{sub}</span>}
+      </div>
+      {sparkPoints && (
+        <div className="db-stat-spark">
+          <Sparkline points={sparkPoints} color={sparkColor} />
+        </div>
+      )}
+    </div>
   );
 }
 
-/* ─── Card ────────────────────────────────────────────────────────────── */
-function Card({ card, colId, onDragStart, onDragEnd, isDragging }) {
-  const hasFooter = card.members.length > 0 || card.due;
+/* ─── Topic Row ───────────────────────────────────────────────────────── */
+function TopicRow({ name, pct, color, img }) {
+  return (
+    <div className="db-topic-row">
+      <div className="db-topic-thumb" style={{ background: color + "22" }}>
+        <span style={{ fontSize: 18 }}>{img}</span>
+      </div>
+      <div className="db-topic-info">
+        <span className="db-topic-name">{name}</span>
+        <div className="db-topic-bar-wrap">
+          <div className="db-topic-bar" style={{ width: `${pct}%`, background: color }} />
+        </div>
+      </div>
+      <span className="db-topic-pct" style={{ color }}>{pct}% Correct</span>
+    </div>
+  );
+}
+
+/* ─── Leaderboard Row ─────────────────────────────────────────────────── */
+function LeaderRow({ rank, name, sub, score }) {
+  const initials = name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const avatarColors = ["#4f8ef7", "#f7694f", "#4fcf7a", "#c47af7", "#f7b24f"];
+  const bg = avatarColors[rank % avatarColors.length];
+  return (
+    <div className="db-leader-row">
+      <div className="db-leader-left">
+        <span className="db-leader-rank">{rank}</span>
+        <span className="db-leader-avatar" style={{ background: bg }}>{initials}</span>
+        <div className="db-leader-info">
+          <span className="db-leader-name">{name}</span>
+          <span className="db-leader-sub">{sub}</span>
+        </div>
+      </div>
+      <div className="db-leader-right">
+        <span className="db-leader-score">{score}</span>
+        <span className="db-leader-up"><IconArrowUp /></span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────── */
+function Sidebar({ active, setActive, onLogout }) {
+  const mainNav = [
+    { key: "reports", label: "Reports", icon: <IconReports /> },
+    { key: "library", label: "Library", icon: <IconLibrary /> },
+    { key: "people", label: "People", icon: <IconPeople /> },
+    { key: "activities", label: "Activities", icon: <IconActivities /> },
+  ];
+  const supportNav = [
+    { key: "getstarted", label: "Get Started", icon: <IconGetStarted /> },
+    { key: "settings", label: "Settings", icon: <IconSettings /> },
+  ];
 
   return (
-    <div
-      className={`trello-card${isDragging ? " trello-card--dragging" : ""}`}
-      draggable
-      onDragStart={(e) => onDragStart(e, card.id, colId)}
-      onDragEnd={onDragEnd}
-    >
-      {/* Labels row */}
-      {card.labels.length > 0 && (
-        <div className="trello-card-labels">
-          {card.labels.map((lid) => (
-            <CardLabel key={lid} labelId={lid} />
-          ))}
+    <aside className="db-sidebar">
+      {/* Logo */}
+      <div className="db-sidebar-logo">
+        <span className="db-logo-text">Taskly</span>
+        <span className="db-logo-dot" />
+      </div>
+
+      {/* Main nav */}
+      <nav className="db-sidebar-nav">
+        {mainNav.map((item) => (
+          <button
+            key={item.key}
+            className={`db-nav-item${active === item.key ? " db-nav-item--active" : ""}`}
+            onClick={() => setActive(item.key)}
+          >
+            <span className="db-nav-icon">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Support */}
+      <div className="db-sidebar-section-label">Support</div>
+      <nav className="db-sidebar-nav">
+        {supportNav.map((item) => (
+          <button
+            key={item.key}
+            className={`db-nav-item${active === item.key ? " db-nav-item--active" : ""}`}
+            onClick={() => setActive(item.key)}
+          >
+            <span className="db-nav-icon">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Logout at bottom */}
+      <div className="db-sidebar-footer">
+        <button className="db-logout-btn" onClick={onLogout}>
+          <IconLogout /> Log out
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+/* ─── Reports Page ────────────────────────────────────────────────────── */
+function ReportsPage() {
+  const [timeframe, setTimeframe] = useState("All-time");
+  const [people, setPeople] = useState("All");
+
+  const weakTopics = [
+    { name: "Food Safety", pct: 74, color: "#f7694f", img: "🍔" },
+    { name: "Compliance Basics Procedures", pct: 52, color: "#f7b24f", img: "📋" },
+    { name: "Company Networking", pct: 36, color: "#f7694f", img: "🌐" },
+  ];
+  const strongTopics = [
+    { name: "Covid Protocols", pct: 97, color: "#4fcf7a", img: "😷" },
+    { name: "Cyber Security", pct: 94, color: "#4fcf7a", img: "🔒" },
+    { name: "Social Media Policy", pct: 91, color: "#4f8ef7", img: "📱" },
+  ];
+  const userLeaders = [
+    { rank: 1, name: "Jesse Thomas", sub: "637 Points · 98% Correct", score: 1 },
+    { rank: 2, name: "Maria Santos", sub: "580 Points · 95% Correct", score: 2 },
+    { rank: 3, name: "Kenji Watanabe", sub: "544 Points · 93% Correct", score: 3 },
+  ];
+  const groupLeaders = [
+    { rank: 1, name: "Houston Facility", sub: "52 Points · 97% Correct", score: 1 },
+    { rank: 2, name: "Austin Team", sub: "48 Points · 94% Correct", score: 2 },
+    { rank: 3, name: "NYC Office", sub: "41 Points · 91% Correct", score: 3 },
+  ];
+
+  return (
+    <main className="db-main">
+      {/* Page Header */}
+      <div className="db-page-header">
+        <h1 className="db-page-title">Reports</h1>
+      </div>
+
+      {/* Filters */}
+      <div className="db-filters">
+        <div className="db-filter-select">
+          <span className="db-filter-label">Timeframe:</span>
+          <select
+            className="db-filter-control"
+            value={timeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+          >
+            <option>All-time</option>
+            <option>Last 30 days</option>
+            <option>Last 7 days</option>
+            <option>This month</option>
+          </select>
+          <IconChevron />
         </div>
-      )}
+        <div className="db-filter-select">
+          <span className="db-filter-label">People:</span>
+          <select
+            className="db-filter-control"
+            value={people}
+            onChange={(e) => setPeople(e.target.value)}
+          >
+            <option>All</option>
+            <option>My Team</option>
+            <option>Managers</option>
+          </select>
+          <IconChevron />
+        </div>
+      </div>
 
-      {/* Card text */}
-      <span className="trello-card-text">{card.text}</span>
+      {/* Top stat cards */}
+      <div className="db-stats-row">
+        <StatCard label="Active Users" value="27" sub="/80" />
+        <StatCard label="Questions Answered" value="3,298" />
+        <StatCard label="Av. Session Length" value="2m 34s" />
+        <div className="db-stat-card db-stat-card--chart">
+          <span className="db-stat-label">Activity</span>
+          <ActivityChart />
+        </div>
+      </div>
 
-      {/* Footer: due date + members */}
-      {hasFooter && (
-        <div className="trello-card-footer">
-          <div className="trello-card-footer-left">
-            {card.due && (
-              <span className={`trello-card-due${card.dueOverdue ? " trello-card-due--overdue" : ""}`}>
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor">
-                  <path d="M5.5 1a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm.5 5H4V3h1v2.5H6V6z" />
-                </svg>
-                {card.due}
-              </span>
-            )}
-          </div>
-          <div className="trello-card-footer-right">
-            {card.members.map((m) => (
-              <Avatar key={m} initials={m} size={22} />
+      {/* Knowledge stat cards */}
+      <div className="db-stats-row db-stats-row--knowledge">
+        <StatCard
+          label="Starting Knowledge"
+          value="64%"
+          sparkPoints={[40, 38, 45, 42, 55, 50, 60, 58, 64]}
+          sparkColor="#4f8ef7"
+        />
+        <StatCard
+          label="Current Knowledge"
+          value="86%"
+          sparkPoints={[60, 65, 63, 70, 72, 75, 80, 82, 86]}
+          sparkColor="#4f8ef7"
+        />
+        <StatCard
+          label="Knowledge Gain"
+          value="+34%"
+          sparkPoints={[5, 8, 12, 10, 18, 22, 25, 28, 34]}
+          sparkColor="#4fcf7a"
+        />
+      </div>
+
+      {/* Topics + Leaderboards */}
+      <div className="db-bottom-grid">
+        {/* Weakest Topics */}
+        <div className="db-card">
+          <h3 className="db-card-title">Weakest Topics</h3>
+          <div className="db-topic-list">
+            {weakTopics.map((t) => (
+              <TopicRow key={t.name} {...t} />
             ))}
           </div>
         </div>
-      )}
 
-      {/* Quick-edit pencil (shows on hover) */}
-      <button className="trello-card-edit-btn" title="Quick edit" aria-label="Quick edit card">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-          <path d="M8.5.5l3 3-7 7H1.5v-3l7-7zm0 1.41L10.09 3.5 9 4.59 7.41 3 8.5 1.91zM2.5 8.09l5-5L9 4.59l-5 5V8.09H2.5v.5z" />
-        </svg>
-      </button>
-    </div>
-  );
-}
-
-/* ─── Column ──────────────────────────────────────────────────────────── */
-function Column({
-  column,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDrop,
-  draggingCardId,
-  onAddCard,
-  onColumnTitleChange,
-}) {
-  const [addingCard, setAddingCard] = useState(false);
-  const [newCardText, setNewCardText] = useState("");
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft] = useState(column.title);
-  const titleInputRef = useRef(null);
-  const cardInputRef = useRef(null);
-
-  const handleTitleClick = () => {
-    setEditingTitle(true);
-    setTimeout(() => titleInputRef.current?.select(), 0);
-  };
-  const handleTitleBlur = () => {
-    setEditingTitle(false);
-    const t = titleDraft.trim();
-    if (t) onColumnTitleChange(column.id, t);
-    else setTitleDraft(column.title);
-  };
-  const handleTitleKey = (e) => {
-    if (e.key === "Enter") titleInputRef.current?.blur();
-    if (e.key === "Escape") { setTitleDraft(column.title); setEditingTitle(false); }
-  };
-
-  const handleAddCardOpen = () => {
-    setAddingCard(true);
-    setTimeout(() => cardInputRef.current?.focus(), 0);
-  };
-  const handleAddCardSubmit = () => {
-    const t = newCardText.trim();
-    if (t) { onAddCard(column.id, t); setNewCardText(""); }
-    setAddingCard(false);
-  };
-  const handleAddCardKey = (e) => {
-    if (e.key === "Enter") handleAddCardSubmit();
-    if (e.key === "Escape") { setAddingCard(false); setNewCardText(""); }
-  };
-
-  return (
-    <div
-      className="trello-column"
-      onDragOver={onDragOver}
-      onDrop={(e) => onDrop(e, column.id)}
-    >
-      {/* Column header */}
-      <div className="trello-column-header">
-        {editingTitle ? (
-          <input
-            ref={titleInputRef}
-            className="trello-column-title-input"
-            value={titleDraft}
-            onChange={(e) => setTitleDraft(e.target.value)}
-            onBlur={handleTitleBlur}
-            onKeyDown={handleTitleKey}
-          />
-        ) : (
-          <h3 className="trello-column-title" onClick={handleTitleClick}>
-            {column.title}
-          </h3>
-        )}
-        <button className="trello-column-menu" title="List actions" aria-label="List actions">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <circle cx="8" cy="3" r="1.5" />
-            <circle cx="8" cy="8" r="1.5" />
-            <circle cx="8" cy="13" r="1.5" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Cards list */}
-      <div className="trello-cards-list">
-        {column.cards.map((card) => (
-          <Card
-            key={card.id}
-            card={card}
-            colId={column.id}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            isDragging={draggingCardId === card.id}
-          />
-        ))}
-      </div>
-
-      {/* Add card */}
-      {addingCard ? (
-        <div className="trello-add-card-form">
-          <textarea
-            ref={cardInputRef}
-            className="trello-add-card-textarea"
-            placeholder="Enter a title for this card…"
-            value={newCardText}
-            onChange={(e) => setNewCardText(e.target.value)}
-            onKeyDown={handleAddCardKey}
-            rows={3}
-          />
-          <div className="trello-add-card-actions">
-            <button className="trello-add-card-submit" onClick={handleAddCardSubmit}>
-              Add card
-            </button>
-            <button
-              className="trello-add-card-cancel"
-              onClick={() => { setAddingCard(false); setNewCardText(""); }}
-            >
-              ✕
-            </button>
+        {/* Strongest Topics */}
+        <div className="db-card">
+          <h3 className="db-card-title">Strongest Topics</h3>
+          <div className="db-topic-list">
+            {strongTopics.map((t) => (
+              <TopicRow key={t.name} {...t} />
+            ))}
           </div>
         </div>
-      ) : (
-        <button className="trello-add-card-btn" onClick={handleAddCardOpen}>
-          <span className="trello-add-icon">+</span> Add a card
-        </button>
-      )}
-    </div>
-  );
-}
 
-/* ─── Board ───────────────────────────────────────────────────────────── */
-function Board() {
-  const [columns, setColumns] = useState(INITIAL_COLUMNS);
-  const [boardTitle, setBoardTitle] = useState("Product Roadmap");
-  const [editingBoardTitle, setEditingBoardTitle] = useState(false);
-  const [boardTitleDraft, setBoardTitleDraft] = useState("Product Roadmap");
-  const [addingList, setAddingList] = useState(false);
-  const [newListTitle, setNewListTitle] = useState("");
-  const boardTitleRef = useRef(null);
-  const newListRef = useRef(null);
-
-  const dragCardId = useRef(null);
-  const dragSourceColId = useRef(null);
-  const [draggingCardId, setDraggingCardId] = useState(null);
-
-  const handleBoardTitleClick = () => {
-    setBoardTitleDraft(boardTitle);
-    setEditingBoardTitle(true);
-    setTimeout(() => boardTitleRef.current?.select(), 0);
-  };
-  const handleBoardTitleBlur = () => {
-    setEditingBoardTitle(false);
-    const t = boardTitleDraft.trim();
-    if (t) setBoardTitle(t);
-    else setBoardTitleDraft(boardTitle);
-  };
-  const handleBoardTitleKey = (e) => {
-    if (e.key === "Enter") boardTitleRef.current?.blur();
-    if (e.key === "Escape") { setBoardTitleDraft(boardTitle); setEditingBoardTitle(false); }
-  };
-
-  const handleColumnTitleChange = (colId, newTitle) =>
-    setColumns((cols) => cols.map((c) => (c.id === colId ? { ...c, title: newTitle } : c)));
-
-  const handleAddCard = (colId, text) => {
-    const newCard = { id: uid(), text, labels: [], members: [], due: null, dueOverdue: false };
-    setColumns((cols) =>
-      cols.map((c) => (c.id === colId ? { ...c, cards: [...c.cards, newCard] } : c))
-    );
-  };
-
-  const handleAddListOpen = () => {
-    setAddingList(true);
-    setTimeout(() => newListRef.current?.focus(), 0);
-  };
-  const handleAddListSubmit = () => {
-    const t = newListTitle.trim();
-    if (t) { setColumns((cols) => [...cols, { id: uid(), title: t, cards: [] }]); setNewListTitle(""); }
-    setAddingList(false);
-  };
-  const handleAddListKey = (e) => {
-    if (e.key === "Enter") handleAddListSubmit();
-    if (e.key === "Escape") { setAddingList(false); setNewListTitle(""); }
-  };
-
-  const handleDragStart = (e, cardId, colId) => {
-    dragCardId.current = cardId;
-    dragSourceColId.current = colId;
-    setDraggingCardId(cardId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-  const handleDragEnd = () => {
-    dragCardId.current = null;
-    dragSourceColId.current = null;
-    setDraggingCardId(null);
-  };
-  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
-  const handleDrop = (e, targetColId) => {
-    e.preventDefault();
-    const cardId = dragCardId.current;
-    const sourceColId = dragSourceColId.current;
-    if (!cardId || sourceColId === targetColId) return;
-    setColumns((cols) => {
-      let movedCard = null;
-      const updated = cols.map((col) => {
-        if (col.id === sourceColId) {
-          movedCard = col.cards.find((c) => c.id === cardId);
-          return { ...col, cards: col.cards.filter((c) => c.id !== cardId) };
-        }
-        return col;
-      });
-      return updated.map((col) => {
-        if (col.id === targetColId && movedCard) return { ...col, cards: [...col.cards, movedCard] };
-        return col;
-      });
-    });
-    dragCardId.current = null;
-    dragSourceColId.current = null;
-    setDraggingCardId(null);
-  };
-
-  return (
-    <div className="trello-board">
-      <BoardHeaderBar
-        boardTitle={boardTitle}
-        editingTitle={editingBoardTitle}
-        draft={boardTitleDraft}
-        onChange={(e) => setBoardTitleDraft(e.target.value)}
-        onBlur={handleBoardTitleBlur}
-        onKeyDown={handleBoardTitleKey}
-        onClick={handleBoardTitleClick}
-        titleRef={boardTitleRef}
-      />
-
-      <div className="trello-columns-container">
-        {columns.map((col) => (
-          <Column
-            key={col.id}
-            column={col}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            draggingCardId={draggingCardId}
-            onAddCard={handleAddCard}
-            onColumnTitleChange={handleColumnTitleChange}
-          />
-        ))}
-
-        {addingList ? (
-          <div className="trello-add-list-form">
-            <input
-              ref={newListRef}
-              className="trello-add-list-input"
-              placeholder="Enter list title…"
-              value={newListTitle}
-              onChange={(e) => setNewListTitle(e.target.value)}
-              onKeyDown={handleAddListKey}
-            />
-            <div className="trello-add-list-actions">
-              <button className="trello-add-list-submit" onClick={handleAddListSubmit}>
-                Add list
-              </button>
-              <button
-                className="trello-add-list-cancel"
-                onClick={() => { setAddingList(false); setNewListTitle(""); }}
-              >
-                ✕
-              </button>
-            </div>
+        {/* User Leaderboard */}
+        <div className="db-card">
+          <h3 className="db-card-title">User Leaderboard</h3>
+          <div className="db-leader-list">
+            {userLeaders.map((l) => (
+              <LeaderRow key={l.rank} {...l} />
+            ))}
           </div>
-        ) : (
-          <button className="trello-add-list-btn" onClick={handleAddListOpen}>
-            <span className="trello-add-icon">+</span> Add another list
-          </button>
-        )}
+        </div>
+
+        {/* Groups Leaderboard */}
+        <div className="db-card">
+          <h3 className="db-card-title">Groups Leaderboard</h3>
+          <div className="db-leader-list">
+            {groupLeaders.map((l) => (
+              <LeaderRow key={l.rank} {...l} />
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 
-/* ─── Dashboard root ──────────────────────────────────────────────────── */
+/* ─── Placeholder Pages ───────────────────────────────────────────────── */
+function PlaceholderPage({ title }) {
+  return (
+    <main className="db-main db-placeholder">
+      <h1 className="db-page-title">{title}</h1>
+      <p className="db-placeholder-text">This section is coming soon.</p>
+    </main>
+  );
+}
+
+/* ─── Dashboard Root ──────────────────────────────────────────────────── */
 function Dashboard({ user }) {
+  const [activeNav, setActiveNav] = useState("reports");
   const handleLogout = async () => { await signOut(auth); };
 
+  const pages = {
+    reports: <ReportsPage />,
+    library: <PlaceholderPage title="Library" />,
+    people: <PlaceholderPage title="People" />,
+    activities: <PlaceholderPage title="Activities" />,
+    getstarted: <PlaceholderPage title="Get Started" />,
+    settings: <PlaceholderPage title="Settings" />,
+  };
+
   return (
-    <div className="trello-root">
-      <Navbar user={user} onLogout={handleLogout} />
-      <Board />
+    <div className="db-root">
+      <Sidebar active={activeNav} setActive={setActiveNav} onLogout={handleLogout} />
+      {pages[activeNav] || <ReportsPage />}
     </div>
   );
 }
